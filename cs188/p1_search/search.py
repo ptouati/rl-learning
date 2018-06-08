@@ -18,7 +18,6 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-from collections import deque
 
 
 class SearchProblem:
@@ -91,11 +90,11 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     closed = set()
     fringe = util.Stack()
-    edge = {}
+    edges = {}
 
     start = problem.getStartState()
     fringe.push(start)
-    edge[start] = None
+    edges[start] = None
 
     while True:
         if fringe.isEmpty():
@@ -107,31 +106,59 @@ def depthFirstSearch(problem):
             closed.add(current)
             successors = problem.getSuccessors(current)
             # for i in reversed(xrange(len(successors))):
-            #     s = successors[i]
-            #     state, action, cost = s
-            #     if state not in closed:
-            #         fringe.push(state)
-            #         edge[state] = (current, action)
             for i in xrange(len(successors)):
                 s = successors[i]
                 state, action, cost = s
                 if state not in closed:
                     fringe.push(state)
-                    edge[state] = (current, action)
+                    edges[state] = (current, action)
 
-    result = deque()
-    while edge[current] != None:
-        previous, action = edge[current]
-        result.appendleft(action)
+    result = []
+    while edges[current] != None:
+        previous, action = edges[current]
+        result.append(action)
         current = previous
 
+    result.reverse()
     return result
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    closed = set()
+    fringe = util.Queue()
+    start = problem.getStartState()
+    fringe.push(start)
+
+    edges = {}
+    edges[start] = None
+
+    while True:
+        if fringe.isEmpty():
+            return []
+        current = fringe.pop()
+        if problem.isGoalState(current):
+            break
+        if current not in closed:
+            closed.add(current)
+            successors = problem.getSuccessors(current)
+            for s in successors:
+                state, action, cost = s
+                if state not in edges:
+                    fringe.push(state)
+                if state not in edges:
+                    edges[state] = (current, action)
+
+    result = []
+    while edges[current] != None:
+        previous, action = edges[current]
+        result.append(action)
+        current = previous
+
+    result.reverse()
+    return result
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
