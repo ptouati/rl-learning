@@ -71,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -88,17 +89,78 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    closed = set()
+    fringe = util.Stack()
+
+    start = problem.getStartState()
+    fringe.push(start)
+    edges = {start: None}
+
+    while True:
+        if fringe.isEmpty():
+            return []
+        current = fringe.pop()
+        if problem.isGoalState(current):
+            break
+        if current not in closed:
+            closed.add(current)
+            successors = problem.getSuccessors(current)
+            for i in xrange(len(successors)):
+                s = successors[i]
+                state, action, cost = s
+                if state not in closed:
+                    fringe.push(state)
+                    edges[state] = (current, action)
+    result = []
+    while edges[current] is not None:
+        previous, action = edges[current]
+        result.append(action)
+        current = previous
+
+    result.reverse()
+    return result
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    closed = set()
+    fringe = util.Queue()
+    start = problem.getStartState()
+    fringe.push(start)
+
+    edges = {start: None}
+
+    while True:
+        if fringe.isEmpty():
+            return []
+        current = fringe.pop()
+        if problem.isGoalState(current):
+            break
+        if current not in closed:
+            closed.add(current)
+            successors = problem.getSuccessors(current)
+            for s in successors:
+                state, action, cost = s
+                if state not in edges:
+                    fringe.push(state)
+                if state not in edges:
+                    edges[state] = (current, action)
+    result = []
+    while edges[current] is not None:
+        previous, action = edges[current]
+        result.append(action)
+        current = previous
+
+    result.reverse()
+    return result
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,6 +168,7 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
