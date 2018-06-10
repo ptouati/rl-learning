@@ -16,6 +16,7 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+from contextlib import closing
 
 import util
 
@@ -105,8 +106,7 @@ def depthFirstSearch(problem):
         if current not in closed:
             closed.add(current)
             successors = problem.getSuccessors(current)
-            for i in xrange(len(successors)):
-                s = successors[i]
+            for s in successors:
                 state, action, cost = s
                 if state not in closed:
                     fringe.push(state)
@@ -142,7 +142,7 @@ def breadthFirstSearch(problem):
             successors = problem.getSuccessors(current)
             for s in successors:
                 state, action, cost = s
-                if state not in edges:
+                if state not in closed:
                     fringe.push(state)
                 if state not in edges:
                     edges[state] = (current, action)
@@ -159,7 +159,34 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    closed = set()
+    fringe = util.PriorityQueueWithFunction(lambda x: x[1])
+    start = problem.getStartState()
+    fringe.push((start, 0))
+    edges = {start: None}
+
+    while True:
+        if fringe.isEmpty():
+            return []
+        current, cost = fringe.pop()
+        if problem.isGoalState(current):
+            break
+        if current not in closed:
+            closed.add(current)
+            successors = problem.getSuccessors(current)
+            for s in successors:
+                state, action, cost = s
+                if state not in closed:
+                    fringe.push((state, cost))
+                    edges[state] = (current, action)
+    result = []
+    while edges[current] is not None:
+        previous, action = edges[current]
+        result.append(action)
+        current = previous
+
+    result.reverse()
+    return result
 
 
 def nullHeuristic(state, problem=None):
