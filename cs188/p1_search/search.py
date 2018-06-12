@@ -160,15 +160,16 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     closed = set()
-    fringe = util.PriorityQueueWithFunction(lambda x: x[1])
+    fringe = util.PriorityQueue()
     start = problem.getStartState()
-    fringe.push((start, 0))
-    edges = {start: None}
+    fringe.push(start, 0)
+
+    edges = {start: (None, None, 0)}
 
     while True:
         if fringe.isEmpty():
             return []
-        current, cost = fringe.pop()
+        current = fringe.pop()
         if problem.isGoalState(current):
             break
         if current not in closed:
@@ -177,15 +178,20 @@ def uniformCostSearch(problem):
             for s in successors:
                 state, action, cost = s
                 if state not in closed:
-                    fringe.push((state, cost))
-                    edges[state] = (current, action)
+                    previous_cost = edges[current][2]
+                    total_cost = previous_cost + cost
+                    fringe.update(state, total_cost)
+                if state not in edges:
+                    edges[state] = (current, action, total_cost)
+                elif edges[state][2] > total_cost:
+                    edges[state] = (current, action, total_cost)
     result = []
-    while edges[current] is not None:
-        previous, action = edges[current]
+    while edges[current][0] is not None:
+        previous, action, cost = edges[current]
         result.append(action)
         current = previous
-
     result.reverse()
+
     return result
 
 
