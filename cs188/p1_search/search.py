@@ -161,32 +161,36 @@ def uniformCostSearch(problem):
     "*** YOUR CODE HERE ***"
     closed = set()
     fringe = util.PriorityQueueWithFunction(lambda x: x[1])
+
     start = problem.getStartState()
     fringe.push((start, 0))
-    edges = {start: None}
+
+    edges = {start: (None, 0)}
 
     while True:
         if fringe.isEmpty():
             return []
-        current, cost = fringe.pop()
-        if problem.isGoalState(current):
+        current_state, current_cost = fringe.pop()
+        if problem.isGoalState(current_state):
             break
-        if current not in closed:
-            closed.add(current)
-            successors = problem.getSuccessors(current)
+        if current_state not in closed:
+            closed.add(current_state)
+            successors = problem.getSuccessors(current_state)
             for s in successors:
                 state, action, cost = s
                 if state not in closed:
-                    fringe.push((state, cost))
-                    edges[state] = (current, action)
-    result = []
-    while edges[current] is not None:
-        previous, action = edges[current]
-        result.append(action)
-        current = previous
+                    totalCost = cost + current_cost
+                    fringe.push(state, totalCost)
 
+                    edges[state] = (current_state, action)
+    result = []
+    while edges[current_state][0] is not None:
+        previous, action = edges[current_state]
+        result.append(action)
+        current_state = previous
     result.reverse()
     return result
+
 
 
 def nullHeuristic(state, problem=None):
