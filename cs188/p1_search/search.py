@@ -160,37 +160,37 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     closed = set()
-    fringe = util.PriorityQueueWithFunction(lambda x: x[1])
-
+    fringe = util.PriorityQueue()
     start = problem.getStartState()
-    fringe.push((start, 0))
+    fringe.push(start, 0)
 
-    edges = {start: (None, 0)}
+    edges = {start: (None, None, 0)}
 
     while True:
         if fringe.isEmpty():
             return []
-        current_state, current_cost = fringe.pop()
-        if problem.isGoalState(current_state):
+        current = fringe.pop()
+        if problem.isGoalState(current):
             break
-        if current_state not in closed:
-            closed.add(current_state)
-            successors = problem.getSuccessors(current_state)
+        if current not in closed:
+            closed.add(current)
+            successors = problem.getSuccessors(current)
             for s in successors:
                 state, action, cost = s
                 if state not in closed:
-                    totalCost = cost + current_cost
-                    fringe.push(state, totalCost)
-
-                    edges[state] = (current_state, action)
+                    previous_cost = edges[current][2]
+                    total_cost = previous_cost + cost
+                    fringe.update(state, total_cost)
+                if state not in edges or edges[state][2] > total_cost:
+                    edges[state] = (current, action, total_cost)
     result = []
-    while edges[current_state][0] is not None:
-        previous, action = edges[current_state]
+    while edges[current][0] is not None:
+        previous, action, cost = edges[current]
         result.append(action)
-        current_state = previous
+        current = previous
     result.reverse()
-    return result
 
+    return result
 
 
 def nullHeuristic(state, problem=None):
@@ -204,7 +204,42 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    closed = set()
+    fringe = util.PriorityQueue()
+    start = problem.getStartState()
+
+    heuristicValue = heuristic(start, problem)
+    priority = 0 + heuristicValue
+    fringe.push(start, priority)
+
+    edges = {start: (None, None, 0)}
+
+    while True:
+        if fringe.isEmpty():
+            return []
+        current = fringe.pop()
+        if problem.isGoalState(current):
+            break
+        if current not in closed:
+            closed.add(current)
+            successors = problem.getSuccessors(current)
+            _, _, previous_cost = edges[current]
+            for s in successors:
+                if s not in closed:
+                    state, action, cost = s
+                    total_cost = previous_cost + cost
+                    priority = total_cost + heuristic(state, problem)
+                    fringe.push(state, priority)
+                if state not in edges or edges[state][2] > total_cost:
+                    edges[state] = (current, action, total_cost)
+    result = []
+    while edges[current][0] is not None:
+        previous, action, cost = edges[current]
+        result.append(action)
+        current = previous
+    result.reverse()
+
+    return result
 
 
 # Abbreviations
